@@ -4,6 +4,8 @@
 #include "Globals.h"
 #include "p2Point.h"
 
+struct PhysBody;
+
 class ModulePlayer : public Module
 {
 public:
@@ -17,9 +19,6 @@ public:
 public:
 
 	SDL_Texture* graphics;
-	Animation* current_animation;
-	Animation idle;
-	Animation up;
-	Animation down;
-	p2Point<int> position;
+	PhysBody* body;
+	PhysBody* body2;
 };

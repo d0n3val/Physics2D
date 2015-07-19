@@ -5,22 +5,6 @@
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	graphics = NULL;
-	current_animation = NULL;
-
-	// idle animation (just the ship)
-	idle.frames.PushBack({66, 1, 32, 14});
-
-	// move upwards
-	up.frames.PushBack({100, 1, 32, 14});
-	up.frames.PushBack({132, 0, 32, 14});
-	up.loop = false;
-	up.speed = 0.1f;
-	
-	// Move down
-	down.frames.PushBack({33, 1, 32, 14});
-	down.frames.PushBack({0, 1, 32, 14});
-	down.loop = false;
-	down.speed = 0.1f;
 }
 
 ModulePlayer::~ModulePlayer()
@@ -31,10 +15,18 @@ bool ModulePlayer::Start()
 {
 	LOG("Loading player");
 
-	graphics = App->textures->Load("rtype/ship.png");
+	graphics = App->textures->Load("pinball/box128.png");
+	SDL_Rect r;
+	r.x = 500;
+	r.y = 100;
+	r.w = r.h = 128;
 
-	position.x = 150;
-	position.y = 120;
+	body = App->physics->AddBody(r);
+
+	r.x = 400;
+	r.y = 400;
+
+	body2 = App->physics->AddBody(r, b_static);
 
 	return true;
 }
@@ -52,6 +44,14 @@ bool ModulePlayer::CleanUp()
 // Update: draw background
 update_status ModulePlayer::Update()
 {
+	int x, y;
+
+	body->GetPosition(x, y);
+	App->renderer->Blit(graphics, x, y, NULL, 1.0f, body->GetAngle());
+
+	body2->GetPosition(x, y);
+	App->renderer->Blit(graphics, x, y, NULL, 1.0f, body2->GetAngle());
+
 	return UPDATE_CONTINUE;
 }
 
