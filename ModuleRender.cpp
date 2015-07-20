@@ -165,3 +165,32 @@ bool ModuleRender::DrawLine(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Ui
 
 	return ret;
 }
+
+bool ModuleRender::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool use_camera)
+{
+	bool ret = true;
+
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+	int result = -1;
+	SDL_Point points[360];
+
+	float factor = M_PI / 180.0f;
+
+	for(uint i = 0; i < 360; ++i)
+	{
+		points[i].x = x + radius * cos( i * factor);
+		points[i].y = y + radius * sin( i * factor);
+	}
+
+	result = SDL_RenderDrawPoints(renderer, points, 360);
+
+	if(result != 0)
+	{
+		LOG("Cannot draw quad to screen. SDL_RenderFillRect error: %s", SDL_GetError());
+		ret = false;
+	}
+
+	return ret;
+}

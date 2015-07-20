@@ -4,7 +4,7 @@
 #include "Globals.h"
 #include "p2Point.h"
 
-struct PhysBody;
+class PhysBody;
 
 class ModulePlayer : public Module
 {
@@ -21,4 +21,8 @@ public:
 	SDL_Texture* graphics;
 	PhysBody* body;
 	PhysBody* body2;
+	PhysBody* body3;
+
+	SDL_Texture* background;
+	PhysBody* phys_background;
 };

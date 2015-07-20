@@ -13,6 +13,7 @@
 
 class b2World;
 class b2Body;
+class PhysBody;
 
 enum body_type
 {
@@ -21,14 +22,24 @@ enum body_type
 	b_kinematic
 };
 
-struct PhysBody
+class PhysBody
 {
-	b2Body* b;
-	SDL_Rect r;
-	body_type t;
+public:
+
+	PhysBody(b2World* world, b2Body* body, const SDL_Rect& rect, body_type type);
+	~PhysBody();
 
 	double GetAngle() const;
 	void GetPosition(int& x, int& y) const;
+	void SetLinearSpeed(int x, int y);
+	void SetAngularSpeed(float speed);
+
+private:
+
+	b2World* world;
+	b2Body* body;
+	SDL_Rect rect;
+	body_type type;
 };
 
 class ModulePhysics : public Module
@@ -44,7 +55,10 @@ public:
 	update_status PostUpdate();
 	bool CleanUp();
 
-	PhysBody* AddBody(const SDL_Rect& rect, body_type type = b_dynamic);
+	PhysBody* AddBody(const SDL_Rect& rect, body_type type = b_dynamic, float density = 1.0f);
+	PhysBody* AddBody(int x, int y, int radius, body_type type = b_dynamic, float density = 1.0f);
+	PhysBody* AddBody(const SDL_Rect& rect, float* points, uint count, body_type type = b_dynamic, float density = 1.0f);
+	PhysBody* AddEdge(const SDL_Rect& rect, float* points, uint count);
 
 private:
 

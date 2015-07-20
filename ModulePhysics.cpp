@@ -1,6 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModulePhysics.h"
+#include "math.h"
 #include "Box2D/Box2D/Box2D.h"
 
 #ifdef _DEBUG
@@ -90,11 +91,43 @@ update_status ModulePhysics::Update()
 				break;
 
 				case b2Shape::e_circle:
-					LOG("Circle!");
+				{
+					b2CircleShape* shape = (b2CircleShape*)f->GetShape();
+					b2Vec2 pos = f->GetBody()->GetPosition();
+					App->renderer->DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), METERS_TO_PIXELS(shape->m_radius), 255, green, blue);
+				}
+				break;
+
+				case b2Shape::e_chain:
+				{
+					b2ChainShape* shape = (b2ChainShape*)f->GetShape();
+					b2Vec2 prev, v;
+
+					for(int32 i = 0; i < shape->m_count; ++i)
+					{
+						v = b->GetWorldPoint(shape->m_vertices[i]);
+
+						if(i > 0)
+							App->renderer->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), 255, green, blue);
+
+						prev = v;
+					}
+
+					v = b->GetWorldPoint(shape->m_vertices[0]);
+
+					App->renderer->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), 255, green, blue);
+				}
 				break;
 
 				case b2Shape::e_edge:
-				LOG("Edge!");
+				{
+					b2EdgeShape* shape = (b2EdgeShape*)f->GetShape();
+					b2Vec2 v1, v2;
+
+					v1 = b->GetWorldPoint(shape->m_vertex0);
+					v1 = b->GetWorldPoint(shape->m_vertex1);
+					App->renderer->DrawLine(METERS_TO_PIXELS(v1.x), METERS_TO_PIXELS(v1.y), METERS_TO_PIXELS(v2.x), METERS_TO_PIXELS(v2.y), 255, green, blue);
+				}
 				break;
 			}
 		}
@@ -131,58 +164,164 @@ bool ModulePhysics::CleanUp()
 }
 
 //
-PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type )
+PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float density)
 {
-	b2BodyDef box;
-	
+	b2BodyDef body;
 	
 	switch(type)
 	{
 		case b_static:
-			box.type = b2_staticBody;
+			body.type = b2_staticBody;
 			break;
 
 		case b_kinematic:
-			box.type = b2_kinematicBody;
+			body.type = b2_kinematicBody;
 			break;
+
 		default:
-			box.type = b2_dynamicBody;
+			body.type = b2_dynamicBody;
 			break;
 	}
 
-	box.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
-	box.angle = 0.0f;
+	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
+	body.angle = 0.0f;
 
-	b2Body* b = world->CreateBody(&box);
+	b2Body* b = world->CreateBody(&body);
 
 	b2PolygonShape box_shape;
 	box_shape.SetAsBox(PIXEL_TO_METERS(rect.w/2), PIXEL_TO_METERS(rect.h/2));
 
 	b2FixtureDef box_fixture;
 	box_fixture.shape = &box_shape;
-	box_fixture.density = 1;
+	box_fixture.density = density;
 
 	b->CreateFixture(&box_fixture);
 
-	PhysBody* ret = new PhysBody();
+	PhysBody* ret = new PhysBody(world, b, rect, type);
+	bodies.add(ret);
 
-	ret->r = rect;
-	ret->b = b;
-	ret->t = type;
+	return ret;
+}
+PhysBody* ModulePhysics::AddBody(int x, int y, int radius, body_type type, float density)
+{
+	b2BodyDef body;
 
+	switch(type)
+	{
+		case b_static:
+		body.type = b2_staticBody;
+		break;
+
+		case b_kinematic:
+		body.type = b2_kinematicBody;
+		break;
+
+		default:
+		body.type = b2_dynamicBody;
+		break;
+	}
+
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	body.angle = 0.0f;
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2CircleShape shape;
+	shape.m_radius = PIXEL_TO_METERS(radius);
+
+	b2FixtureDef box_fixture;
+	box_fixture.shape = &shape;
+	box_fixture.density = density;
+
+	b->CreateFixture(&box_fixture);
+
+	PhysBody* ret = new PhysBody(world, b, {x,y,radius,radius}, type);
 	bodies.add(ret);
 
 	return ret;
 }
 
-double PhysBody::GetAngle() const
+
+PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count, body_type type, float density)
 {
-	return RADTODEG * b->GetAngle();
+	b2BodyDef body;
+
+	switch(type)
+	{
+		case b_static:
+		body.type = b2_staticBody;
+		break;
+
+		case b_kinematic:
+		body.type = b2_kinematicBody;
+		break;
+
+		default:
+		body.type = b2_dynamicBody;
+		break;
+	}
+
+	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
+	body.angle = 0.0f;
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2PolygonShape shape;
+	b2Vec2* p = new b2Vec2[count / 2];
+	for(uint i = 0; i < count / 2; ++i)
+	{
+		p[i].x = PIXEL_TO_METERS(points[i*2 + 0]) * rect.w;
+		p[i].y = PIXEL_TO_METERS(points[i*2 + 1]) * rect.h;
+	}
+
+	shape.Set(p, count / 2);
+
+	b2FixtureDef box_fixture;
+	box_fixture.shape = &shape;
+	box_fixture.density = density;
+
+	b->CreateFixture(&box_fixture);
+
+	PhysBody* ret = new PhysBody(world, b, rect, type);
+	bodies.add(ret);
+
+	delete[] p;
+
+	return ret;
 }
 
-void PhysBody::GetPosition(int& x, int& y) const
+PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, float* points, uint count)
 {
-	b2Vec2 pos = b->GetPosition();
-	x = METERS_TO_PIXELS(pos.x) - r.w / 2;
-	y = METERS_TO_PIXELS(pos.y) - r.h / 2;
+	b2BodyDef body;
+
+	body.type = b2_staticBody;
+	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
+	body.angle = 0.0f;
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2ChainShape shape;
+	b2Vec2* p = new b2Vec2[count / 2];
+
+	for(uint i = 0; i < count / 2; ++i)
+	{
+		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]) * rect.w;
+		// flip Y coordinates
+		float f = -points[i * 2 + 1];
+		p[i].y = PIXEL_TO_METERS(rect.h) + (PIXEL_TO_METERS(f) * rect.h);
+	}
+
+	shape.CreateLoop(p, count / 2);
+
+	b2FixtureDef box_fixture;
+	box_fixture.shape = &shape;
+
+	b->CreateFixture(&box_fixture);
+
+	PhysBody* ret = new PhysBody(world, b, rect, b_static);
+	bodies.add(ret);
+
+	delete[] p;
+
+	return ret;
 }
