@@ -16,6 +16,5 @@ public:
 public:
 
 	SDL_Texture* graphics;
-	p2Point<int> origin;
-	p2Point<int> destination;
+	PhysBody* background;
 };

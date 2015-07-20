@@ -325,3 +325,11 @@ PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, float* points, uint count
 
 	return ret;
 }
+
+
+void ModulePhysics::DestroyBody(PhysBody* body)
+{
+	assert(body);
+	bodies.del(bodies.findNode(body));
+	delete body;
+}

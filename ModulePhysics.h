@@ -60,6 +60,8 @@ public:
 	PhysBody* AddBody(const SDL_Rect& rect, float* points, uint count, body_type type = b_dynamic, float density = 1.0f);
 	PhysBody* AddEdge(const SDL_Rect& rect, float* points, uint count);
 
+	void DestroyBody(PhysBody* body);
+
 private:
 
 	b2World* world;
