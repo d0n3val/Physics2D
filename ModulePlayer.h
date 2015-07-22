@@ -6,6 +6,15 @@
 
 class PhysBody;
 
+struct Object
+{
+	SDL_Texture* graphic;
+	PhysBody* body;
+
+	Object() : graphic(NULL), body(NULL)
+	{}
+};
+
 class ModulePlayer : public Module
 {
 public:
@@ -18,6 +27,9 @@ public:
 
 public:
 
-	SDL_Texture* graphics;
-	PhysBody* body;
+	Object ball;
+	Object flipper1;
+	Object flipper2;
+	PhysBody* flipper1_wheel;
+	PhysBody* flipper2_wheel;
 };

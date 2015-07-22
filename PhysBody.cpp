@@ -4,12 +4,12 @@
 #include "ModulePhysics.h"
 #include "Box2D/Box2D/Box2D.h"
 
-PhysBody::PhysBody(b2World* world, b2Body* body, const SDL_Rect& rect, body_type type) : world(world), body(body), rect(rect), type(type)
+PhysBody::PhysBody(b2Body* body, const SDL_Rect& rect, body_type type) : body(body), rect(rect), type(type)
 {}
 
 PhysBody::~PhysBody()
 {
-	world->DestroyBody(body);
+	body->GetWorld()->DestroyBody(body);
 	body = NULL;
 }
 
@@ -33,4 +33,14 @@ void PhysBody::SetLinearSpeed(int x, int y)
 void PhysBody::SetAngularSpeed(float speed)
 {
 	body->SetAngularVelocity(speed * DEGTORAD);
+}
+
+void PhysBody::Push(float x, float y)
+{
+	body->ApplyForceToCenter(b2Vec2(x, y), true);
+}
+
+void PhysBody::Turn(int degrees)
+{
+	body->ApplyAngularImpulse(DEGTORAD * degrees, true);
 }

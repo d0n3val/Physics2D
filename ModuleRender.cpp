@@ -176,12 +176,12 @@ bool ModuleRender::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 
 	int result = -1;
 	SDL_Point points[360];
 
-	float factor = M_PI / 180.0f;
+	float factor = (float) M_PI / 180.0f;
 
 	for(uint i = 0; i < 360; ++i)
 	{
-		points[i].x = x + radius * cos( i * factor);
-		points[i].y = y + radius * sin( i * factor);
+		points[i].x = (int) (x + radius * cos( i * factor));
+		points[i].y = (int) (y + radius * sin( i * factor));
 	}
 
 	result = SDL_RenderDrawPoints(renderer, points, 360);

@@ -54,7 +54,7 @@ update_status ModulePhysics::PreUpdate()
 }
 
 // 
-update_status ModulePhysics::Update()
+update_status ModulePhysics::PostUpdate()
 {
 	// get center
 	for(b2Body* b = world->GetBodyList(); b; b = b->GetNext())
@@ -137,7 +137,7 @@ update_status ModulePhysics::Update()
 }
 
 // 
-update_status ModulePhysics::PostUpdate()
+update_status ModulePhysics::Update()
 {
 	return UPDATE_CONTINUE;
 }
@@ -164,7 +164,7 @@ bool ModulePhysics::CleanUp()
 }
 
 //
-PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float density)
+PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float density, float restitution, bool ccd)
 {
 	b2BodyDef body;
 	
@@ -185,6 +185,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float den
 
 	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
 	body.angle = 0.0f;
+	body.bullet = ccd;
 
 	b2Body* b = world->CreateBody(&body);
 
@@ -194,15 +195,16 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float den
 	b2FixtureDef box_fixture;
 	box_fixture.shape = &box_shape;
 	box_fixture.density = density;
+	box_fixture.restitution = restitution;
 
 	b->CreateFixture(&box_fixture);
 
-	PhysBody* ret = new PhysBody(world, b, rect, type);
+	PhysBody* ret = new PhysBody(b, rect, type);
 	bodies.add(ret);
 
 	return ret;
 }
-PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, float density)
+PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, float density, float restitution, bool ccd)
 {
 	b2BodyDef body;
 
@@ -225,6 +227,7 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, flo
 
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 	body.angle = 0.0f;
+	body.bullet = ccd;
 
 	b2Body* b = world->CreateBody(&body);
 
@@ -234,10 +237,11 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, flo
 	b2FixtureDef box_fixture;
 	box_fixture.shape = &shape;
 	box_fixture.density = density;
+	box_fixture.restitution = restitution;
 
 	b->CreateFixture(&box_fixture);
 
-	PhysBody* ret = new PhysBody(world, b, {x,y,diameter,diameter}, type);
+	PhysBody* ret = new PhysBody(b, {x,y,diameter,diameter}, type);
 	bodies.add(ret);
 
 	return ret;
@@ -272,8 +276,8 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count
 	b2Vec2* p = new b2Vec2[count / 2];
 	for(uint i = 0; i < count / 2; ++i)
 	{
-		p[i].x = PIXEL_TO_METERS(points[i*2 + 0]) * rect.w;
-		p[i].y = PIXEL_TO_METERS(points[i*2 + 1]) * rect.h;
+		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]) * rect.w;
+		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]) * rect.h;
 	}
 
 	shape.Set(p, count / 2);
@@ -284,7 +288,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count
 
 	b->CreateFixture(&box_fixture);
 
-	PhysBody* ret = new PhysBody(world, b, rect, type);
+	PhysBody* ret = new PhysBody(b, {rect.x, rect.y, rect.w, rect.h}, type);
 	bodies.add(ret);
 
 	delete[] p;
@@ -320,7 +324,7 @@ PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, float* points, uint count
 
 	b->CreateFixture(&box_fixture);
 
-	PhysBody* ret = new PhysBody(world, b, rect, b_static);
+	PhysBody* ret = new PhysBody(b, rect, b_static);
 	bodies.add(ret);
 
 	delete[] p;
@@ -328,10 +332,29 @@ PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, float* points, uint count
 	return ret;
 }
 
-
 void ModulePhysics::DestroyBody(PhysBody* body)
 {
 	assert(body);
 	bodies.del(bodies.findNode(body));
 	delete body;
+}
+
+void ModulePhysics::CreateRevoluteJoint(PhysBody* body_1, PhysBody* body_2, int x_pivot_1, int y_pivot_1, int x_pivot_2, int y_pivot_2, int max_angle, int min_angle)
+{
+	b2RevoluteJointDef def;
+
+	def.bodyA = body_1->body;
+	def.bodyB = body_2->body;
+
+	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot_1), PIXEL_TO_METERS(y_pivot_1));
+	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot_2), PIXEL_TO_METERS(y_pivot_2));
+
+	if(max_angle != INT_MAX && min_angle != INT_MIN)
+	{
+		def.enableLimit = true;
+		def.upperAngle = DEGTORAD * max_angle;
+		def.lowerAngle = DEGTORAD * min_angle;
+	}
+
+	b2Joint* joint = world->CreateJoint(&def);
 }
