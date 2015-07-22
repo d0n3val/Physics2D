@@ -56,7 +56,7 @@ public:
 	bool CleanUp();
 
 	PhysBody* AddBody(const SDL_Rect& rect, body_type type = b_dynamic, float density = 1.0f);
-	PhysBody* AddBody(int x, int y, int radius, body_type type = b_dynamic, float density = 1.0f);
+	PhysBody* AddBody(int x, int y, int diameter, body_type type = b_dynamic, float density = 1.0f);
 	PhysBody* AddBody(const SDL_Rect& rect, float* points, uint count, body_type type = b_dynamic, float density = 1.0f);
 	PhysBody* AddEdge(const SDL_Rect& rect, float* points, uint count);
 

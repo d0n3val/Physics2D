@@ -202,7 +202,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float den
 
 	return ret;
 }
-PhysBody* ModulePhysics::AddBody(int x, int y, int radius, body_type type, float density)
+PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, float density)
 {
 	b2BodyDef body;
 
@@ -221,13 +221,15 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int radius, body_type type, float
 		break;
 	}
 
+	float radius = PIXEL_TO_METERS(diameter) * 0.5f;
+
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 	body.angle = 0.0f;
 
 	b2Body* b = world->CreateBody(&body);
 
 	b2CircleShape shape;
-	shape.m_radius = PIXEL_TO_METERS(radius);
+	shape.m_radius = radius;
 
 	b2FixtureDef box_fixture;
 	box_fixture.shape = &shape;
@@ -235,7 +237,7 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int radius, body_type type, float
 
 	b->CreateFixture(&box_fixture);
 
-	PhysBody* ret = new PhysBody(world, b, {x,y,radius,radius}, type);
+	PhysBody* ret = new PhysBody(world, b, {x,y,diameter,diameter}, type);
 	bodies.add(ret);
 
 	return ret;
