@@ -18,11 +18,12 @@ bool ModulePlayer::Start()
 	ball.graphic = App->textures->Load("pinball/ball.png");
 	flipper1.graphic = App->textures->Load("pinball/flipper1.png");
 	flipper2.graphic = App->textures->Load("pinball/flipper2.png");
+	flipper_fx = App->audio->LoadFx("pinball/flipper.wav");
 
 	flipper_up1.graphic = App->textures->Load("pinball/flipper_up1.png");
 	flipper_up2.graphic = App->textures->Load("pinball/flipper_up2.png");
 
-	ball.body = App->physics->AddBody(200, 500, 28, b_dynamic, 1.0f, 0.3f, true);
+	ball.body = App->physics->AddBody(563, 582, 28, b_dynamic, 1.0f, 0.3f, true);
 
 	float vertex1[16] = {
 		-0.50190f, -0.01053f,
@@ -92,13 +93,19 @@ update_status ModulePlayer::Update()
 		ball.body->Push(0.0f, -500.0f);
 	}
 
-	if(App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+
+	if(App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RSHIFT) == KEY_DOWN)
+	{
+		App->audio->PlayFx(flipper_fx);
+	}
+
+	if(App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
 	{
 		flipper1.body->Turn(-360);
 		flipper_up1.body->Turn(-360);
 	}
 
-	if(App->input->GetKey(SDL_SCANCODE_RSHIFT) == KEY_REPEAT)
+	if(App->input->GetKey(SDL_SCANCODE_RSHIFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RSHIFT) == KEY_REPEAT)
 	{
 		flipper2.body->Turn(360);
 		flipper_up2.body->Turn(360);

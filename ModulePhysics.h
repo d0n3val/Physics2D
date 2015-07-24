@@ -1,6 +1,7 @@
 #pragma once
 #include "Module.h"
 #include "Globals.h"
+#include "Box2D/Box2D/Box2D.h"
 
 #define PIXELS_PER_METER 50.0f // if touched change METER_PER_PIXEL too
 #define METER_PER_PIXEL 0.02f // this is 1 / PIXELS_PER_METER !
@@ -10,10 +11,6 @@
 
 #define METERS_TO_PIXELS(m) ((int) floor(PIXELS_PER_METER * m))
 #define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * p)
-
-class b2World;
-class b2Body;
-class PhysBody;
 
 enum body_type
 {
@@ -39,6 +36,7 @@ public:
 public:
 
 	b2Body* body;
+	Module* listener;
 
 private:
 
@@ -46,7 +44,7 @@ private:
 	body_type type;
 };
 
-class ModulePhysics : public Module
+class ModulePhysics : public Module, public b2ContactListener
 {
 public:
 	ModulePhysics(Application* app, bool start_enabled = true);
@@ -68,7 +66,14 @@ public:
 
 	void DestroyBody(PhysBody* body);
 
+	//void BeginContact(b2Contact* contact);
+	//void EndContact(b2Contact* contact);
+	void PreSolve(b2Contact* contact, const b2Manifold* oldManifold);
+	//void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse);
+	
 private:
+
+	PhysBody* Find(b2Body* body) const;
 
 	b2World* world;
 	p2List<PhysBody*> bodies;

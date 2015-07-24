@@ -30,6 +30,7 @@ public:
 	Object ball;
 	Object flipper1;
 	Object flipper2;
+	uint flipper_fx;
 	PhysBody* flipper1_wheel;
 	PhysBody* flipper2_wheel;
 

@@ -55,12 +55,12 @@ public:
 		clear();
 	}
 
-	p2List_item<tdata>* getFirst()
+	p2List_item<tdata>* getFirst() const
 	{
 		return start;
 	}
 
-	p2List_item<tdata>* getLast()
+	p2List_item<tdata>* getLast() const
 	{
 		return end;
 	}
@@ -91,7 +91,7 @@ public:
 			end->next = p_data_item;
 			end = p_data_item;
 		}
-		--size;
+		++size;
 		return(p_data_item);
 	}
 

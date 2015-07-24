@@ -36,6 +36,7 @@ bool ModulePhysics::Start()
 
 	// Construct a world object, which will hold and simulate the rigid bodies.
 	world = new b2World(b2Vec2(GRAVITY_X, -GRAVITY_Y));
+	world->SetContactListener(this);
 
 	return true;
 }
@@ -251,6 +252,8 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, flo
 	PhysBody* ret = new PhysBody(b, {x,y,diameter,diameter}, type);
 	bodies.add(ret);
 
+	b->SetUserData(ret);
+
 	return ret;
 }
 
@@ -300,6 +303,8 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count
 
 	delete[] p;
 
+	b->SetUserData(ret);
+
 	return ret;
 }
 
@@ -334,6 +339,8 @@ PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, float* points, uint count
 
 	delete[] p;
 
+	b->SetUserData(ret);
+
 	return ret;
 }
 
@@ -362,4 +369,33 @@ void ModulePhysics::CreateRevoluteJoint(PhysBody* body_1, PhysBody* body_2, int 
 	}
 
 	b2Joint* joint = world->CreateJoint(&def);
+}
+
+PhysBody* ModulePhysics::Find(b2Body* body) const
+{
+	const p2List_item<PhysBody*>* item = bodies.getFirst();
+
+	while(item != NULL)
+	{
+		if(item->data->body == body)
+			return item->data;
+		item = item->next;
+	}
+
+	return NULL;
+}
+
+void ModulePhysics::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
+{
+	b2Fixture* fixtureA = contact->GetFixtureA();
+	b2Fixture* fixtureB = contact->GetFixtureB();
+
+	PhysBody* physA = Find(fixtureA->GetBody());
+	PhysBody* physB = Find(fixtureA->GetBody());
+
+	if(physA->listener != NULL)
+		physA->listener->OnCollision(physA, physB);
+
+	if(physB->listener != NULL)
+		physB->listener->OnCollision(physB, physA);
 }

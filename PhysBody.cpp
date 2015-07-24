@@ -4,13 +4,14 @@
 #include "ModulePhysics.h"
 #include "Box2D/Box2D/Box2D.h"
 
-PhysBody::PhysBody(b2Body* body, const SDL_Rect& rect, body_type type) : body(body), rect(rect), type(type)
+PhysBody::PhysBody(b2Body* body, const SDL_Rect& rect, body_type type) : body(body), rect(rect), type(type), listener(NULL)
 {}
 
 PhysBody::~PhysBody()
 {
 	body->GetWorld()->DestroyBody(body);
 	body = NULL;
+	listener = NULL;
 }
 
 double PhysBody::GetAngle() const
