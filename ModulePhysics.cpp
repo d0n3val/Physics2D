@@ -13,6 +13,7 @@
 ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	world = NULL;
+	debug = true;
 }
 
 // Destructor
@@ -56,6 +57,12 @@ update_status ModulePhysics::PreUpdate()
 // 
 update_status ModulePhysics::PostUpdate()
 {
+	if(App->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
+		debug = !debug;
+
+	if(!debug)
+		return UPDATE_CONTINUE;
+
 	// get center
 	for(b2Body* b = world->GetBodyList(); b; b = b->GetNext())
 	{
@@ -311,10 +318,8 @@ PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, float* points, uint count
 
 	for(uint i = 0; i < count / 2; ++i)
 	{
-		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]) * rect.w;
-		// flip Y coordinates
-		float f = -points[i * 2 + 1];
-		p[i].y = PIXEL_TO_METERS(rect.h) + (PIXEL_TO_METERS(f) * rect.h);
+		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);// *rect.w;
+		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);// *rect.h;
 	}
 
 	shape.CreateLoop(p, count / 2);

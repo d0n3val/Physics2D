@@ -32,4 +32,9 @@ public:
 	Object flipper2;
 	PhysBody* flipper1_wheel;
 	PhysBody* flipper2_wheel;
+
+	Object flipper_up1;
+	Object flipper_up2;
+	PhysBody* flipper_up1_wheel;
+	PhysBody* flipper_up2_wheel;
 };

@@ -72,4 +72,5 @@ private:
 
 	b2World* world;
 	p2List<PhysBody*> bodies;
+	bool debug;
 };
