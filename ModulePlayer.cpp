@@ -94,7 +94,7 @@ bool ModulePlayer::CleanUp()
 // Update: draw background
 update_status ModulePlayer::Update()
 {
-	static int spring_push = 175;
+	static float spring_push = 0.0f;
 
 	if(App->input->GetKey(SDL_SCANCODE_RETURN) == KEY_UP)
 	{
@@ -120,11 +120,11 @@ update_status ModulePlayer::Update()
 
 	if(App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
 	{
-		spring_push += 175;
+		spring_push += 175.0f;
 		spring.body->Push(0, spring_push);
 	}
 	else
-		spring_push = 175;
+		spring_push = 0.0f;
 
 	if(App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_UP)
 	{

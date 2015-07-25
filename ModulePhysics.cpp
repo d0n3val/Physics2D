@@ -52,6 +52,18 @@ update_status ModulePhysics::PreUpdate()
 	// It is generally best to keep the time step and iterations fixed.
 	world->Step(timeStep, velocityIterations, positionIterations);
 
+	// Check for collisions on sensors (collision listener does not work for sensors)
+	for(b2Contact* c = world->GetContactList(); c; c = c->GetNext())
+	{
+		if(c->GetFixtureA()->IsSensor() && c->IsTouching())
+		{
+			PhysBody* pb1 = (PhysBody*)c->GetFixtureA()->GetBody()->GetUserData();
+			PhysBody* pb2 = (PhysBody*)c->GetFixtureA()->GetBody()->GetUserData();
+			if(pb1 && pb2 && pb1->listener)
+				pb1->listener->OnCollision(pb1, pb2);
+		}
+	}
+
 	return UPDATE_CONTINUE;
 }
 
@@ -172,7 +184,7 @@ bool ModulePhysics::CleanUp()
 }
 
 //
-PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float density, float restitution, bool ccd)
+PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float density, float restitution, bool ccd, bool isSensor)
 {
 	b2BodyDef body;
 	
@@ -204,6 +216,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float den
 	box_fixture.shape = &box_shape;
 	box_fixture.density = density;
 	box_fixture.restitution = restitution;
+	box_fixture.isSensor = isSensor;
 
 	b->CreateFixture(&box_fixture);
 
@@ -212,7 +225,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float den
 
 	return ret;
 }
-PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, float density, float restitution, bool ccd)
+PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, float density, float restitution, bool ccd, bool isSensor)
 {
 	b2BodyDef body;
 
@@ -246,6 +259,7 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, flo
 	box_fixture.shape = &shape;
 	box_fixture.density = density;
 	box_fixture.restitution = restitution;
+	box_fixture.isSensor = isSensor;
 
 	b->CreateFixture(&box_fixture);
 
@@ -258,7 +272,7 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, flo
 }
 
 
-PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count, body_type type, float density)
+PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count, body_type type, float density, bool isSensor)
 {
 	b2BodyDef body;
 
@@ -295,6 +309,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count
 	b2FixtureDef box_fixture;
 	box_fixture.shape = &shape;
 	box_fixture.density = density;
+	box_fixture.isSensor = isSensor;
 
 	b->CreateFixture(&box_fixture);
 
@@ -387,31 +402,14 @@ void ModulePhysics::CreateLineJoint(PhysBody* body_1, PhysBody* body_2, int x_pi
 	world->CreateJoint(&def);
 }
 
-PhysBody* ModulePhysics::Find(b2Body* body) const
-{
-	const p2List_item<PhysBody*>* item = bodies.getFirst();
-
-	while(item != NULL)
-	{
-		if(item->data->body == body)
-			return item->data;
-		item = item->next;
-	}
-
-	return NULL;
-}
-
 void ModulePhysics::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
-	b2Fixture* fixtureA = contact->GetFixtureA();
-	b2Fixture* fixtureB = contact->GetFixtureB();
+	PhysBody* physA = (PhysBody*) contact->GetFixtureA()->GetBody()->GetUserData();
+	PhysBody* physB = (PhysBody*) contact->GetFixtureB()->GetBody()->GetUserData();
 
-	PhysBody* physA = Find(fixtureA->GetBody());
-	PhysBody* physB = Find(fixtureA->GetBody());
-
-	if(physA->listener != NULL)
+	if(physA && physA->listener != NULL)
 		physA->listener->OnCollision(physA, physB);
 
-	if(physB->listener != NULL)
+	if(physB && physB->listener != NULL)
 		physB->listener->OnCollision(physB, physA);
 }

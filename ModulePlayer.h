@@ -42,4 +42,6 @@ public:
 	Object flipper_up2;
 	PhysBody* flipper_up1_wheel;
 	PhysBody* flipper_up2_wheel;
+
+	PhysBody* sensor1;
 };

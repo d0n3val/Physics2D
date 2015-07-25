@@ -127,6 +127,52 @@ bool ModuleSceneIntro::Start()
 	bouncer2.body = App->physics->AddBody(343, 169, 50, b_static, 1.0f, 1.5f);
 	bouncer2.body->listener = this;
 
+	// Sensors (blue lights on the floor)
+	tex_light_tiny = App->textures->Load("pinball/sensor_tiny.png");
+	tex_light_medium = App->textures->Load("pinball/sensor_med.png");
+	tex_light_big = App->textures->Load("pinball/sensor_big.png");
+
+	fx_light_tiny = App->audio->LoadFx("pinball/bonus2.wav");
+	fx_light_medium = App->audio->LoadFx("pinball/bonus2.wav");
+	fx_light_big = App->audio->LoadFx("pinball/bonus3.wav");
+
+	lights.PushBack(Light(this, 422, 140, lightTypes::tiny));
+	lights.PushBack(Light(this, 451, 159, lightTypes::tiny));
+	lights.PushBack(Light(this, 481, 179, lightTypes::tiny));
+
+	lights.PushBack(Light(this, 220, 514, lightTypes::tiny));
+	lights.PushBack(Light(this, 251, 530, lightTypes::tiny));
+
+	lights.PushBack(Light(this, 73, 525, lightTypes::tiny));
+	lights.PushBack(Light(this, 61, 556, lightTypes::tiny));
+	lights.PushBack(Light(this, 49, 587, lightTypes::tiny));
+
+	lights.PushBack(Light(this, 73, 245, lightTypes::medium));
+	lights.PushBack(Light(this, 64, 207, lightTypes::medium));
+	lights.PushBack(Light(this, 61, 170, lightTypes::medium));
+	lights.PushBack(Light(this, 58, 134, lightTypes::medium));
+	lights.PushBack(Light(this, 57, 99, lightTypes::medium));
+	lights.PushBack(Light(this, 55, 63, lightTypes::medium));
+	lights.PushBack(Light(this, 13, 63, lightTypes::medium));
+	lights.PushBack(Light(this, 13, 100, lightTypes::medium));
+	lights.PushBack(Light(this, 14, 136, lightTypes::medium));
+	lights.PushBack(Light(this, 15, 174, lightTypes::medium));
+	lights.PushBack(Light(this, 19, 214, lightTypes::medium));
+	lights.PushBack(Light(this, 25, 253, lightTypes::medium));
+	lights.PushBack(Light(this, 34, 291, lightTypes::medium));
+	lights.PushBack(Light(this, 46, 333, lightTypes::medium));
+	lights.PushBack(Light(this, 61, 373, lightTypes::medium));
+
+	lights.PushBack(Light(this, 266, 63, lightTypes::big));
+	lights.PushBack(Light(this, 309, 58, lightTypes::big));
+	lights.PushBack(Light(this, 352, 59, lightTypes::big));
+
+	lights.PushBack(Light(this, 426, 32, lightTypes::big));
+	lights.PushBack(Light(this, 385, 477, lightTypes::big));
+
+	lights.PushBack(Light(this, 6, 870, lightTypes::big));
+	lights.PushBack(Light(this, 472, 870, lightTypes::big));
+
 	return ret;
 }
 
@@ -162,6 +208,16 @@ update_status ModuleSceneIntro::Update()
 			bouncer2.hit_timer = 0;
 	}
 
+
+
+	for(uint i = 0; i < lights.Count(); ++i)
+	{
+		if(lights[i].on == true)
+		{
+			App->renderer->Blit(lights[i].texture, lights[i].x, lights[i].y);
+		}
+	}
+
 	char str[10];
 	sprintf_s(str, "%d,%d", App->input->GetMouseX(), App->input->GetMouseY());
 	App->window->SetTitle(str);
@@ -176,10 +232,58 @@ void ModuleSceneIntro::OnCollision(PhysBody* body1, PhysBody* body2)
 	{
 		bouncer1.hit_timer = SDL_GetTicks() + BOUNCER_TIME;
 		App->audio->PlayFx(bouncer1.fx);
+		return;
 	}
-	else if(bouncer2.body == body1)
+	
+	if(bouncer2.body == body1)
 	{
 		bouncer2.hit_timer = SDL_GetTicks() + BOUNCER_TIME;
 		App->audio->PlayFx(bouncer2.fx);
+		return;
 	}
+
+	for(uint i = 0; i < lights.Count(); ++i)
+	{
+		if(body1 == lights[i].body)
+		{
+			if(lights[i].on == false)
+			{
+				lights[i].on = true;
+				App->audio->PlayFx(lights[i].fx);
+			}
+			return;
+		}
+	}
+}
+
+Light::Light(ModuleSceneIntro* scene, int x, int y, lightTypes type)
+{
+	this->type = type;
+	this->x = x;
+	this->y = y;
+
+	int radius;
+
+	switch(type)
+	{
+		case tiny:
+			radius = 6;
+			texture = scene->tex_light_tiny;
+			fx = scene->fx_light_tiny;
+			break;
+		case medium:
+			radius = 7;
+			texture = scene->tex_light_medium;
+			fx = scene->fx_light_medium;
+			break;
+		case big:
+			radius = 11;
+			texture = scene->tex_light_big;
+			fx = scene->fx_light_big;
+			break;
+	}
+
+	body = scene->App->physics->AddBody(x + radius, y + radius, radius * 2, b_static, 1.0f, 1.0f, false, true);
+	body->listener = scene;
+	on = false;
 }
