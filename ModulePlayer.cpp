@@ -23,6 +23,9 @@ bool ModulePlayer::Start()
 	flipper_up1.graphic = App->textures->Load("pinball/flipper_up1.png");
 	flipper_up2.graphic = App->textures->Load("pinball/flipper_up2.png");
 
+	spring.graphic = App->textures->Load("pinball/spring.png");
+	spring_fx = App->audio->LoadFx("pinball/spring2.wav");
+
 	ball.body = App->physics->AddBody(563, 582, 28, b_dynamic, 1.0f, 0.3f, true);
 
 	float vertex1[16] = {
@@ -63,6 +66,9 @@ bool ModulePlayer::Start()
 	flipper_up2_wheel = App->physics->AddBody(473, 401, 10, b_static);
 	App->physics->CreateRevoluteJoint(flipper_up2.body, flipper_up2_wheel, 25, 0, 0,0, 55, -5);
 
+	spring.body = App->physics->AddBody({565, 943, 45, 47}, b_dynamic);
+	spring_wheel = App->physics->AddBody(535, 907, 10, b_static);
+	App->physics->CreateLineJoint(spring.body, spring_wheel, 0, 0, 0, 0, 20.0f, 1.0f);
 
 	return true;
 }
@@ -88,27 +94,41 @@ bool ModulePlayer::CleanUp()
 // Update: draw background
 update_status ModulePlayer::Update()
 {
+	static int spring_push = 175;
+
 	if(App->input->GetKey(SDL_SCANCODE_RETURN) == KEY_UP)
 	{
-		ball.body->Push(0.0f, -500.0f);
+		ball.body->Push(0.0f, -400.0f);
 	}
 
-
-	if(App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RSHIFT) == KEY_DOWN)
+	if(App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN)
 	{
 		App->audio->PlayFx(flipper_fx);
 	}
 
-	if(App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+	if(App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
 		flipper1.body->Turn(-360);
 		flipper_up1.body->Turn(-360);
 	}
 
-	if(App->input->GetKey(SDL_SCANCODE_RSHIFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RSHIFT) == KEY_REPEAT)
+	if(App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 	{
 		flipper2.body->Turn(360);
 		flipper_up2.body->Turn(360);
+	}
+
+	if(App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
+	{
+		spring_push += 175;
+		spring.body->Push(0, spring_push);
+	}
+	else
+		spring_push = 175;
+
+	if(App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_UP)
+	{
+		App->audio->PlayFx(spring_fx);
 	}
 
 	int x, y;
@@ -127,6 +147,9 @@ update_status ModulePlayer::Update()
 
 	flipper_up2.body->GetPosition(x, y);
 	App->renderer->Blit(flipper_up2.graphic, x, y, NULL, 1.0f, flipper_up2.body->GetAngle());
+
+	spring.body->GetPosition(x, y);
+	App->renderer->Blit(spring.graphic, x, y, NULL, 1.0f, spring.body->GetAngle());
 
 	return UPDATE_CONTINUE;
 }

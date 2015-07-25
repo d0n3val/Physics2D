@@ -20,6 +20,10 @@ bool ModuleSceneIntro::Start()
 
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 
+	// Music
+	//App->audio->PlayMusic("pinball/Rhinoceros2.ogg", 0.0f);
+
+	// Graphics
 	graphics = App->textures->Load("pinball/pinball.png");
 	bouncer1.texture = bouncer2.texture = App->textures->Load("pinball/bouncer_hit.png");
 

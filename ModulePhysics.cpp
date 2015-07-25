@@ -368,7 +368,23 @@ void ModulePhysics::CreateRevoluteJoint(PhysBody* body_1, PhysBody* body_2, int 
 		def.lowerAngle = DEGTORAD * min_angle;
 	}
 
-	b2Joint* joint = world->CreateJoint(&def);
+	world->CreateJoint(&def);
+}
+
+void ModulePhysics::CreateLineJoint(PhysBody* body_1, PhysBody* body_2, int x_pivot_1, int y_pivot_1, int x_pivot_2, int y_pivot_2, float frequency, float damping)
+{
+	b2DistanceJointDef def;
+
+	def.bodyA = body_1->body;
+	def.bodyB = body_2->body;
+
+	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot_1), PIXEL_TO_METERS(y_pivot_1));
+	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot_2), PIXEL_TO_METERS(y_pivot_2));
+
+	def.dampingRatio = damping; // 0 ... 1
+	def.frequencyHz = frequency; // < 30.0f
+
+	world->CreateJoint(&def);
 }
 
 PhysBody* ModulePhysics::Find(b2Body* body) const

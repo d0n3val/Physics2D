@@ -30,9 +30,13 @@ public:
 	Object ball;
 	Object flipper1;
 	Object flipper2;
+	Object spring;
+
+	uint spring_fx;
 	uint flipper_fx;
 	PhysBody* flipper1_wheel;
 	PhysBody* flipper2_wheel;
+	PhysBody* spring_wheel;
 
 	Object flipper_up1;
 	Object flipper_up2;

@@ -63,7 +63,7 @@ public:
 	PhysBody* AddEdge(const SDL_Rect& rect, float* points, uint count);
 
 	void CreateRevoluteJoint(PhysBody* body_1, PhysBody* body_2, int x_pivot_1 = 0, int y_pivot_1 = 0, int x_pivot_2 = 0, int y_pivot_2 = 0, int max_angle = INT_MAX, int min_angle = INT_MIN);
-
+	void CreateLineJoint(PhysBody* body_1, PhysBody* body_2, int x_pivot_1 = 0, int y_pivot_1 = 0, int x_pivot_2 = 0, int y_pivot_2 = 0, float frequency = 15.0f, float damping = 0.5f);
 	void DestroyBody(PhysBody* body);
 
 	//void BeginContact(b2Contact* contact);
