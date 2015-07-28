@@ -10,6 +10,7 @@ struct Object
 {
 	SDL_Texture* graphic;
 	PhysBody* body;
+	uint fx;
 
 	Object() : graphic(NULL), body(NULL)
 	{}
@@ -32,8 +33,6 @@ public:
 	Object flipper2;
 	Object spring;
 
-	uint spring_fx;
-	uint flipper_fx;
 	PhysBody* flipper1_wheel;
 	PhysBody* flipper2_wheel;
 	PhysBody* spring_wheel;

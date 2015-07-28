@@ -13,7 +13,7 @@
 ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	world = NULL;
-	debug = true;
+	debug = false;
 }
 
 // Destructor
@@ -223,6 +223,8 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, body_type type, float den
 	PhysBody* ret = new PhysBody(b, rect, type);
 	bodies.add(ret);
 
+	b->SetUserData(ret);
+
 	return ret;
 }
 PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, float density, float restitution, bool ccd, bool isSensor)
@@ -272,7 +274,7 @@ PhysBody* ModulePhysics::AddBody(int x, int y, int diameter, body_type type, flo
 }
 
 
-PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count, body_type type, float density, bool isSensor)
+PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, int* points, uint count, body_type type, float density, float restitution, bool isSensor)
 {
 	b2BodyDef body;
 
@@ -300,8 +302,8 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count
 	b2Vec2* p = new b2Vec2[count / 2];
 	for(uint i = 0; i < count / 2; ++i)
 	{
-		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]) * rect.w;
-		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]) * rect.h;
+		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
+		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
 	}
 
 	shape.Set(p, count / 2);
@@ -309,6 +311,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count
 	b2FixtureDef box_fixture;
 	box_fixture.shape = &shape;
 	box_fixture.density = density;
+	box_fixture.restitution = restitution;
 	box_fixture.isSensor = isSensor;
 
 	b->CreateFixture(&box_fixture);
@@ -323,7 +326,7 @@ PhysBody* ModulePhysics::AddBody(const SDL_Rect& rect, float* points, uint count
 	return ret;
 }
 
-PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, float* points, uint count)
+PhysBody* ModulePhysics::AddEdge(const SDL_Rect& rect, int* points, uint count)
 {
 	b2BodyDef body;
 

@@ -26,96 +26,236 @@ bool ModuleSceneIntro::Start()
 	// Graphics
 	graphics = App->textures->Load("pinball/pinball.png");
 	bouncer1.texture = bouncer2.texture = App->textures->Load("pinball/bouncer_hit.png");
+	side_bouncer1.texture = App->textures->Load("pinball/left_bouncer_hit.png");
+	side_bouncer2.texture = App->textures->Load("pinball/right_bouncer_hit.png");
 
 	bouncer1.fx = bouncer2.fx = App->audio->LoadFx("pinball/ding_short.wav");
+	side_bouncer1.fx = side_bouncer2.fx = App->audio->LoadFx("pinball/ring.wav");
 
-	float points[49 * 2] = {
-		0, 0,
-		0, -818,
-		-22, -897,
-		-69, -953,
-		-125, -994,
-		-195, -1019,
-		-370, -1019,
-		-402, -1004,
-		-433, -970,
-		-440, -927,
-		-437, -896,
-		-430, -856,
-		-404, -808,
-		-411, -803,
-		-435, -851,
-		-448, -900,
-		-453, -997,
-		-461, -1007,
-		-468, -1014,
-		-485, -1012,
-		-494, -1001,
-		-496, -979,
-		-491, -851,
-		-485, -809,
-		-467, -752,
-		-469, -742,
-		-477, -748,
-		-500, -808,
-		-507, -971,
-		-518, -988,
-		-531, -991,
-		-561, -990,
-		-575, -978,
-		-582, -962,
-		-582, -833,
-		-576, -761,
-		-558, -685,
-		-507, -523,
-		-551, -413,
-		-551, -351,
-		-585, -309,
-		-585, -106,
-		-413, 1,
-		-255, 2,
-		-81, -106,
-		-83, -309,
-		-132, -373,
-		-44, -564,
-		-44, 0
-	};
-	float p2[] = {
-		0, 0, 0, 48, 139, 143, 131, 108, 100, 60, 65, 26, 28, 4, 2, 0
-	};
-	float p3[] = {
-		0,0,6,-1,10,1,14,139,28,203,43,247,262,357,262,380,270,388,334,404,326,447,305,515,296,515,296,506,319,449,317,437,308,425,291,416,274,417,266,427,255,472,175,431,170,425,162,376,155,367,135,355,112,353,105,361,114,409,91,403,21,204,5,145,0,-1
-	};
-	float p4[] = {
-		0,0,104,-171,125,-227,132,-283,133,-324,126,-324,80,-228,82,-221,99,-211,97,-198,56,-147,40,-145,-1,-5,0,0
-	};
-	float p5[] = {
-		0,0,10,0,9,100,103,158,103,166,95,166,0,106,0,-1
-	};
-	float p6[] = {
-		0, 0,11, 0,11, 106,- 87, 168,- 93, 164,- 91, 155,3, 98,1, 0
-	};
-	float p7[] = {
-		0, 0,7, 0,7, 52,-2, 52,- 1, 1
-	};
-	float p8[] = {
-		0, 0,10, 0,10, 50,1, 50,1, 0
-	};
-	float p9[] = {
-		0, 0, 10, 0, 10, 54, 1, 54, 1, -1
+	player_lose_fx = App->audio->LoadFx("pinball/long_bonus.wav");
+
+	// Pivot 0, 0
+	int pinball[134] = {
+		584, 1079,
+		584, 221,
+		578, 187,
+		566, 149,
+		545, 106,
+		523, 77,
+		496, 51,
+		463, 31,
+		421, 12,
+		375, 4,
+		219, 4,
+		189, 15,
+		172, 29,
+		159, 46,
+		150, 68,
+		147, 90,
+		148, 121,
+		155, 152,
+		159, 168,
+		180, 209,
+		179, 216,
+		170, 216,
+		147, 172,
+		141, 152,
+		137, 121,
+		134, 90,
+		131, 25,
+		124, 14,
+		113, 8,
+		97, 11,
+		88, 24,
+		89, 97,
+		92, 153,
+		96, 195,
+		99, 216,
+		116, 270,
+		115, 278,
+		106, 275,
+		89, 215,
+		85, 192,
+		78, 64,
+		75, 46,
+		65, 36,
+		40, 29,
+		16, 36,
+		3, 58,
+		3, 203,
+		8, 250,
+		15, 293,
+		21, 321,
+		75, 492,
+		75, 504,
+		33, 607,
+		32, 670,
+		0, 708,
+		0, 916,
+		171, 1022,
+		171, 1076,
+		326, 1076,
+		326, 1023,
+		499, 915,
+		499, 713,
+		451, 652,
+		451, 645,
+		536, 455,
+		543, 455,
+		543, 1079
 	};
 
-	App->physics->AddEdge({585, 1024, 585, 1024}, points, 49 * 2);
-	App->physics->AddEdge({382, 54, 585, 1024}, p2, 16);
-	App->physics->AddEdge({35, 70, 585, 1024}, p3, 64);
-	App->physics->AddEdge({390, 607, 585, 1024}, p4, 26);
-	App->physics->AddEdge({34, 749, 585, 1024}, p5, 16);
-	App->physics->AddEdge({456, 750, 585, 1024}, p6, 16);
-	App->physics->AddEdge({248, 54, 585, 1024}, p7, 10);
-	App->physics->AddEdge({293, 45, 585, 1024}, p8, 10);
-	App->physics->AddEdge({334, 46, 585, 1024}, p9, 10);
+	App->physics->AddEdge({0, 0, 585, 1024}, pinball, 134);
 
-	// Other elements
+	// Pivot 0, 0
+	int pinball2[14] = {
+		521, 195,
+		507, 151,
+		478, 110,
+		442, 76,
+		409, 59,
+		382, 51,
+		382, 103
+	};
+
+	App->physics->AddEdge({0, 0, 585, 1024}, pinball2, 14);
+
+	// Pivot 0, 0
+	int pinball3[8] = {
+		248, 54,
+		257, 54,
+		257, 105,
+		248, 105
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball3, 8);
+
+	// Pivot 0, 0
+	int pinball4[8] = {
+		294, 48,
+		303, 48,
+		303, 97,
+		294, 97
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball4, 8);
+
+	// Pivot 0, 0
+	int pinball5[8] = {
+		335, 48,
+		344, 48,
+		344, 97,
+		336, 97
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball5, 8);
+
+	// Pivot 0, 0
+	int pinball6[68] = {
+		36, 70,
+		45, 70,
+		47, 153,
+		50, 216,
+		65, 276,
+		82, 322,
+		299, 429,
+		296, 445,
+		301, 460,
+		369, 477,
+		369, 489,
+		362, 520,
+		341, 584,
+		333, 585,
+		332, 576,
+		352, 523,
+		352, 508,
+		341, 497,
+		328, 490,
+		310, 490,
+		303, 499,
+		292, 543,
+		208, 501,
+		203, 493,
+		196, 445,
+		184, 434,
+		168, 427,
+		160, 424,
+		148, 424,
+		142, 430,
+		150, 481,
+		128, 476,
+		51, 261,
+		41, 211
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball6, 68);
+
+	// Pivot 0, 0
+	int pinball7[26] = {
+		382, 608,
+		388, 612,
+		497, 432,
+		514, 369,
+		520, 333,
+		520, 287,
+		513, 287,
+		466, 382,
+		487, 400,
+		487, 415,
+		442, 467,
+		427, 466,
+		408, 544
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball7, 26);
+
+	// Pivot 0, 0
+	int pinball8[12] = {
+		33, 750,
+		43, 750,
+		43, 849,
+		138, 908,
+		134, 917,
+		33, 855
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball8, 12);
+
+	// Pivot 0, 0
+	int pinball9[12] = {
+		464, 750,
+		457, 750,
+		457, 850,
+		360, 909,
+		364, 917,
+		464, 856
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball9, 12);
+
+	// Pivot 0, 0
+	int pinball10[10] = {
+		80, 725,
+		80, 824,
+		136, 856,
+		145, 849,
+		92, 723
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball10, 10);
+
+	// Pivot 0, 0
+	int pinball11[10] = {
+		415, 725,
+		415, 824,
+		360, 857,
+		353, 849,
+		405, 725
+	};
+
+	App->physics->AddEdge({0, 0, 0, 0}, pinball11, 10);
+
+	// Other elements ------------------------------------------------
 
 	// Small bouncy ball bottom center under flippers
 	App->physics->AddBody(248, 1024, 24, b_static, 1.0f, 0.8f);
@@ -126,6 +266,30 @@ bool ModuleSceneIntro::Start()
 
 	bouncer2.body = App->physics->AddBody(343, 169, 50, b_static, 1.0f, 1.5f);
 	bouncer2.body->listener = this;
+
+	// Bouncers on the sides
+	
+	// Pivot 0, 0
+	int b1[8] = {
+		90, 733,
+		101, 728,
+		147, 838,
+		133, 843
+	};
+
+	side_bouncer1.body = App->physics->AddBody({0, 0, 585, 1024}, b1, 8, b_static, 1.0f, 1.0f, false);
+	side_bouncer1.body->listener = this;
+
+	// Pivot 0, 0
+	int b2[8] = {
+		409, 732,
+		398, 726,
+		350, 835,
+		365, 841
+	};
+
+	side_bouncer2.body = App->physics->AddBody({0, 0, 585, 1024}, b2, 8, b_static, 1.0f, 1.0f, false);
+	side_bouncer2.body->listener = this;
 
 	// Sensors (blue lights on the floor)
 	tex_light_tiny = App->textures->Load("pinball/sensor_tiny.png");
@@ -172,6 +336,11 @@ bool ModuleSceneIntro::Start()
 
 	lights.PushBack(Light(this, 6, 870, lightTypes::big));
 	lights.PushBack(Light(this, 472, 870, lightTypes::big));
+	
+	// Sensor for player losing (under flippers)
+
+	player_lose = App->physics->AddBody({245, 1080, 200, 50}, b_static, 1.0f, 0.0f, false, true);
+	player_lose->listener = this;
 
 	return ret;
 }
@@ -208,6 +377,21 @@ update_status ModuleSceneIntro::Update()
 			bouncer2.hit_timer = 0;
 	}
 
+	if(side_bouncer1.hit_timer > 0)
+	{
+		if(SDL_TICKS_PASSED(SDL_GetTicks(), side_bouncer1.hit_timer) == false)
+			App->renderer->Blit(side_bouncer1.texture, 84, 729);
+		else
+			side_bouncer1.hit_timer = 0;
+	}
+
+	if(side_bouncer2.hit_timer > 0)
+	{
+		if(SDL_TICKS_PASSED(SDL_GetTicks(), side_bouncer2.hit_timer) == false)
+			App->renderer->Blit(side_bouncer2.texture, 357, 729);
+		else
+			side_bouncer2.hit_timer = 0;
+	}
 
 
 	for(uint i = 0; i < lights.Count(); ++i)
@@ -217,10 +401,6 @@ update_status ModuleSceneIntro::Update()
 			App->renderer->Blit(lights[i].texture, lights[i].x, lights[i].y);
 		}
 	}
-
-	char str[10];
-	sprintf_s(str, "%d,%d", App->input->GetMouseX(), App->input->GetMouseY());
-	App->window->SetTitle(str);
 
 	return UPDATE_CONTINUE;
 }
@@ -242,6 +422,20 @@ void ModuleSceneIntro::OnCollision(PhysBody* body1, PhysBody* body2)
 		return;
 	}
 
+	if(side_bouncer1.body == body1)
+	{
+		side_bouncer1.hit_timer = SDL_GetTicks() + BOUNCER_TIME;
+		App->audio->PlayFx(side_bouncer1.fx);
+		return;
+	}
+
+	if(side_bouncer2.body == body1)
+	{
+		side_bouncer2.hit_timer = SDL_GetTicks() + BOUNCER_TIME;
+		App->audio->PlayFx(side_bouncer2.fx);
+		return;
+	}
+
 	for(uint i = 0; i < lights.Count(); ++i)
 	{
 		if(body1 == lights[i].body)
@@ -253,6 +447,15 @@ void ModuleSceneIntro::OnCollision(PhysBody* body1, PhysBody* body2)
 			}
 			return;
 		}
+	}
+
+	if(player_lose == body1)
+	{
+		App->player->ball.body->SetLinearSpeed(0, 0);
+		App->player->ball.body->SetAngularSpeed(0);
+		App->player->ball.body->SetPosition(563, 582);
+		App->audio->PlayFx(player_lose_fx);
+		return;
 	}
 }
 

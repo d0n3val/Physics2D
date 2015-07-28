@@ -22,8 +22,8 @@ double PhysBody::GetAngle() const
 void PhysBody::GetPosition(int& x, int& y) const
 {
 	b2Vec2 pos = body->GetPosition();
-	x = METERS_TO_PIXELS(pos.x) - rect.w / 2;
-	y = METERS_TO_PIXELS(pos.y) - rect.h / 2;
+	x = METERS_TO_PIXELS(pos.x)- rect.w / 2;
+	y = METERS_TO_PIXELS(pos.y)- rect.h / 2;
 }
 
 void PhysBody::SetLinearSpeed(int x, int y)
@@ -44,4 +44,9 @@ void PhysBody::Push(float x, float y)
 void PhysBody::Turn(int degrees)
 {
 	body->ApplyAngularImpulse(DEGTORAD * degrees, true);
+}
+
+void PhysBody::SetPosition(int x, int y)
+{
+	body->SetTransform(b2Vec2(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y)), 0.0f);
 }
