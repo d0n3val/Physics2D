@@ -76,4 +76,8 @@ public:
 
 	PhysBody* player_lose;
 	uint player_lose_fx;
+	uint player_restart_fx;
+	uint last_score = 0;
+	uint score = 0;
+	uint lives = 3;
 };

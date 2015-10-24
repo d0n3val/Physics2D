@@ -33,6 +33,7 @@ bool ModuleSceneIntro::Start()
 	side_bouncer1.fx = side_bouncer2.fx = App->audio->LoadFx("pinball/ring.wav");
 
 	player_lose_fx = App->audio->LoadFx("pinball/long_bonus.wav");
+	player_restart_fx = App->audio->LoadFx("pinball/long_bonus2.wav");
 
 	// Pivot 0, 0
 	int pinball[134] = {
@@ -366,7 +367,10 @@ update_status ModuleSceneIntro::Update()
 		if(SDL_TICKS_PASSED(SDL_GetTicks(), bouncer1.hit_timer) == false)
 			App->renderer->Blit(bouncer1.texture, 237, 155);
 		else
+		{
 			bouncer1.hit_timer = 0;
+			score += 10;
+		}
 	}
 
 	if(bouncer2.hit_timer > 0)
@@ -374,7 +378,10 @@ update_status ModuleSceneIntro::Update()
 		if(SDL_TICKS_PASSED(SDL_GetTicks(), bouncer2.hit_timer) == false)
 			App->renderer->Blit(bouncer2.texture, 323, 150);
 		else
+		{
 			bouncer2.hit_timer = 0;
+			score += 10;
+		}
 	}
 
 	if(side_bouncer1.hit_timer > 0)
@@ -382,7 +389,10 @@ update_status ModuleSceneIntro::Update()
 		if(SDL_TICKS_PASSED(SDL_GetTicks(), side_bouncer1.hit_timer) == false)
 			App->renderer->Blit(side_bouncer1.texture, 84, 729);
 		else
+		{
 			side_bouncer1.hit_timer = 0;
+			score += 10;
+		}
 	}
 
 	if(side_bouncer2.hit_timer > 0)
@@ -390,7 +400,10 @@ update_status ModuleSceneIntro::Update()
 		if(SDL_TICKS_PASSED(SDL_GetTicks(), side_bouncer2.hit_timer) == false)
 			App->renderer->Blit(side_bouncer2.texture, 357, 729);
 		else
+		{
 			side_bouncer2.hit_timer = 0;
+			score += 10;
+		}
 	}
 
 
@@ -401,6 +414,11 @@ update_status ModuleSceneIntro::Update()
 			App->renderer->Blit(lights[i].texture, lights[i].x, lights[i].y);
 		}
 	}
+
+	// Update title with score
+	char title[50];
+	sprintf_s(title, "Balls: %d Score: %06d Last Score: %06d", lives, score, last_score);
+	App->window->SetTitle(title);
 
 	return UPDATE_CONTINUE;
 }
@@ -444,6 +462,18 @@ void ModuleSceneIntro::OnCollision(PhysBody* body1, PhysBody* body2)
 			{
 				lights[i].on = true;
 				App->audio->PlayFx(lights[i].fx);
+				switch(lights[i].type)
+				{
+					case tiny:
+					score += 50;
+					break;
+					case medium:
+					score += 100;
+					break;
+					case big:
+					score += 300;
+					break;
+				}
 			}
 			return;
 		}
@@ -454,7 +484,20 @@ void ModuleSceneIntro::OnCollision(PhysBody* body1, PhysBody* body2)
 		App->player->ball.body->SetLinearSpeed(0, 0);
 		App->player->ball.body->SetAngularSpeed(0);
 		App->player->ball.body->SetPosition(563, 582);
-		App->audio->PlayFx(player_lose_fx);
+		lives--;
+
+		if(lives <= 0)
+		{
+			last_score = score;
+			score = 0;
+			lives = 3;
+			App->audio->PlayFx(player_restart_fx);
+		}
+		else
+		{
+			App->audio->PlayFx(player_lose_fx);
+		}
+
 		return;
 	}
 }
